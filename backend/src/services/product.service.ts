@@ -1,6 +1,9 @@
 import { NotFoundError } from '../errors/not-found-error.js';
-import type { ProductRepository } from '../repositories/product.repository.js';
-import type { ListProductsQuery, ProductInput } from '../schemas/product.schema.js';
+import type {
+  FindManyProductsParams,
+  ProductRepository,
+} from '../repositories/product.repository.js';
+import type { ProductInput } from '../schemas/product.schema.js';
 import type { PaginatedProducts, Product } from '../types/product.js';
 
 const PRODUCT_NOT_FOUND_MESSAGE = 'Produto não encontrado';
@@ -8,7 +11,7 @@ const PRODUCT_NOT_FOUND_MESSAGE = 'Produto não encontrado';
 export class ProductService {
   constructor(private readonly repository: ProductRepository) {}
 
-  async list(query: ListProductsQuery): Promise<PaginatedProducts> {
+  async list(query: FindManyProductsParams): Promise<PaginatedProducts> {
     const { items, total } = await this.repository.findMany(query);
 
     return {
