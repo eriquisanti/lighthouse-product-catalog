@@ -1,5 +1,5 @@
 import { Package, Plus, Search } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
@@ -10,11 +10,13 @@ import { Pagination } from '@/components/ui/Pagination';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { getErrorMessage } from '@/lib/http';
 import { cn } from '@/lib/cn';
+import { DeleteProductDialog } from '../components/DeleteProductDialog';
 import { ProductFilters } from '../components/ProductFilters';
 import { ProductTable } from '../components/ProductTable';
 import { ProductTableSkeleton } from '../components/ProductTableSkeleton';
 import { useProductFilters } from '../hooks/use-product-filters';
 import { useProducts } from '../hooks/use-products';
+import type { Product } from '../types/product';
 
 const PAGE_SIZE = 10;
 
@@ -29,6 +31,7 @@ function NewProductLink() {
 
 export function ProductListPage() {
   const filters = useProductFilters();
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const search = useDebouncedValue(filters.search.trim());
   const category = useDebouncedValue(filters.category.trim());
 
@@ -84,7 +87,7 @@ export function ProductListPage() {
         aria-busy={isFetching}
         className={cn('transition-opacity', isPlaceholderData && 'opacity-60')}
       >
-        <ProductTable products={data.data} />
+        <ProductTable products={data.data} onDelete={setProductToDelete} />
         <Pagination
           page={data.meta.page}
           pageSize={data.meta.limit}
@@ -116,6 +119,8 @@ export function ProductListPage() {
         />
         {renderContent()}
       </section>
+
+      <DeleteProductDialog product={productToDelete} onClose={() => setProductToDelete(null)} />
     </>
   );
 }

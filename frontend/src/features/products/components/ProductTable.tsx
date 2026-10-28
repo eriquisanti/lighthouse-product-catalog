@@ -1,6 +1,7 @@
-import { Pencil } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router';
+import { Button } from '@/components/ui/Button';
 import { buttonVariants } from '@/components/ui/button-variants';
 import { formatCurrency } from '@/lib/format';
 import type { Product } from '../types/product';
@@ -8,6 +9,7 @@ import { StockBadge } from './StockBadge';
 
 type ProductTableProps = {
   products: Product[];
+  onDelete: (product: Product) => void;
 };
 
 const columnHeaderClass = 'px-4 py-3 text-xs font-medium tracking-wider text-muted uppercase';
@@ -41,7 +43,7 @@ export function ProductTableLayout({ children }: { children: ReactNode }) {
   );
 }
 
-export function ProductTable({ products }: ProductTableProps) {
+export function ProductTable({ products, onDelete }: ProductTableProps) {
   return (
     <ProductTableLayout>
       {products.map((product) => (
@@ -63,15 +65,26 @@ export function ProductTable({ products }: ProductTableProps) {
           <td className="px-4 py-3 text-right">
             <StockBadge stock={product.stock} />
           </td>
-          <td className="px-4 py-3 text-right">
-            <Link
-              to={`/products/${product.id}/edit`}
-              className={buttonVariants({ variant: 'ghost', size: 'sm' })}
-              aria-label={`Editar ${product.name}`}
-            >
-              <Pencil size={16} />
-              Editar
-            </Link>
+          <td className="px-4 py-3">
+            <div className="flex justify-end gap-1">
+              <Link
+                to={`/products/${product.id}/edit`}
+                className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+                aria-label={`Editar ${product.name}`}
+              >
+                <Pencil size={16} />
+                Editar
+              </Link>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => onDelete(product)}
+                aria-label={`Excluir ${product.name}`}
+              >
+                <Trash2 size={16} />
+                Excluir
+              </Button>
+            </div>
           </td>
         </tr>
       ))}

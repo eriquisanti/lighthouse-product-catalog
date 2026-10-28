@@ -49,7 +49,7 @@ export function useDeleteProduct() {
     mutationFn: (id: string) => productsApi.remove(id),
     onSuccess: (_result, id) => {
       queryClient.removeQueries({ queryKey: productKeys.detail(id) });
-      return queryClient.invalidateQueries({ queryKey: productKeys.lists() });
     },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: productKeys.lists() }),
   });
 }
