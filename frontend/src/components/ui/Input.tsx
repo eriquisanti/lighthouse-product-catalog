@@ -1,7 +1,8 @@
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
+import { fieldClasses } from './field-styles';
 
-type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+type InputProps = ComponentProps<'input'> & {
   icon?: ReactNode;
   invalid?: boolean;
 };
@@ -16,14 +17,7 @@ export function Input({ icon, invalid = false, className, ...props }: InputProps
       )}
       <input
         aria-invalid={invalid || undefined}
-        className={cn(
-          'h-10 w-full rounded-lg border bg-white px-3 text-sm text-ink transition-colors placeholder:text-muted/70 focus:outline-none focus-visible:ring-3',
-          invalid
-            ? 'border-brand-strong focus-visible:ring-brand-soft'
-            : 'border-line hover:border-muted/40 focus-visible:border-ink/40 focus-visible:ring-canvas',
-          Boolean(icon) && 'pl-9',
-          className,
-        )}
+        className={fieldClasses(invalid, cn('h-10', Boolean(icon) && 'pl-9', className))}
         {...props}
       />
     </div>
