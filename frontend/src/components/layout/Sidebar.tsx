@@ -1,18 +1,15 @@
-import type { ComponentType, SVGProps } from 'react';
+import { Package, type LucideIcon } from 'lucide-react';
 import { NavLink } from 'react-router';
-import { PackageIcon } from '@/components/ui/icons';
 import { cn } from '@/lib/cn';
 import { BrandMark } from './BrandMark';
 
 type NavigationItem = {
   label: string;
   to: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
 };
 
-const navigationItems: NavigationItem[] = [
-  { label: 'Produtos', to: '/products', icon: PackageIcon },
-];
+const navigationItems: NavigationItem[] = [{ label: 'Produtos', to: '/products', icon: Package }];
 
 export function Sidebar() {
   return (
@@ -37,7 +34,7 @@ export function Sidebar() {
                   )
                 }
               >
-                <Icon className="text-brand" />
+                <Icon size={16} className="text-brand" />
                 {label}
               </NavLink>
             </li>
