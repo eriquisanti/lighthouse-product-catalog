@@ -311,6 +311,30 @@ describe('Products routes', () => {
       expect(response.statusCode).toBe(400);
       expect(response.json().message).toBe('Corpo da requisição inválido');
     });
+
+    it('returns 400 when the JSON body is empty', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/products',
+        headers: { 'content-type': 'application/json' },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().errors).toEqual([
+        { field: 'body', message: 'O corpo da requisição deve ser um objeto JSON' },
+      ]);
+    });
+
+    it('rejects prototype pollution attempts in the JSON body', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/products',
+        headers: { 'content-type': 'application/json' },
+        payload: '{"__proto__":{"admin":true},"name":"Mouse"}',
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
   });
 
   describe('PUT /products/:id', () => {
@@ -363,6 +387,18 @@ describe('Products routes', () => {
       expect(response.statusCode).toBe(204);
       expect(response.body).toBe('');
       await expect(prisma.product.count()).resolves.toBe(0);
+    });
+
+    it('accepts a JSON content-type header without a body', async () => {
+      const product = await insertProduct();
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: `/products/${product.id}`,
+        headers: { 'content-type': 'application/json' },
+      });
+
+      expect(response.statusCode).toBe(204);
     });
 
     it('returns 404 when the product does not exist', async () => {

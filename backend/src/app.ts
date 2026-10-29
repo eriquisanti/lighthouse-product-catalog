@@ -4,6 +4,7 @@ import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod
 import { ProductController } from './controllers/product.controller.js';
 import type { PrismaClient } from './generated/prisma/client.js';
 import { registerErrorHandlers } from './http/error-handler.js';
+import { registerJsonBodyParser } from './http/json-body-parser.js';
 import { PrismaProductRepository } from './repositories/prisma-product.repository.js';
 import { healthRoutes } from './routes/health.routes.js';
 import { productRoutes } from './routes/product.routes.js';
@@ -24,6 +25,7 @@ export async function buildApp({
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  registerJsonBodyParser(app);
   registerErrorHandlers(app);
 
   await app.register(cors, {
