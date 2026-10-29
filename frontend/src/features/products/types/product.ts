@@ -35,3 +35,7 @@ export type PaginatedProducts = {
   data: Product[];
   meta: PaginationMeta;
 };
+
+export type ProductListResult = PaginatedProducts & {
+  params: ProductListParams;
+};
