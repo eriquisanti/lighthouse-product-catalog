@@ -7,9 +7,7 @@ import { buttonVariants } from '@/components/ui/button-variants';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Pagination } from '@/components/ui/Pagination';
-import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { getErrorMessage } from '@/lib/http';
-import { cn } from '@/lib/cn';
 import { DeleteProductDialog } from '../components/DeleteProductDialog';
 import { ProductFilters } from '../components/ProductFilters';
 import { ProductTable } from '../components/ProductTable';
@@ -32,14 +30,12 @@ function NewProductLink() {
 export function ProductListPage() {
   const filters = useProductFilters();
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const search = useDebouncedValue(filters.search.trim());
-  const category = useDebouncedValue(filters.category.trim());
 
   const { data, isPending, isError, error, isFetching, isPlaceholderData, refetch } = useProducts({
     page: filters.page,
     limit: PAGE_SIZE,
-    search: search || undefined,
-    category: category || undefined,
+    search: filters.search.trim() || undefined,
+    category: filters.category.trim() || undefined,
   });
 
   const totalPages = data?.meta.totalPages ?? 0;
@@ -61,7 +57,9 @@ export function ProductListPage() {
     }
 
     if (data.data.length === 0) {
-      return filters.hasFilters ? (
+      const isFiltered = Boolean(data.params.search || data.params.category);
+
+      return isFiltered ? (
         <EmptyState
           icon={<Search className="size-5" />}
           title="Nenhum produto encontrado"
@@ -83,10 +81,7 @@ export function ProductListPage() {
     }
 
     return (
-      <div
-        aria-busy={isFetching}
-        className={cn('transition-opacity', isPlaceholderData && 'opacity-60')}
-      >
+      <>
         <ProductTable products={data.data} onDelete={setProductToDelete} />
         <Pagination
           page={data.meta.page}
@@ -96,7 +91,7 @@ export function ProductListPage() {
           disabled={isPlaceholderData}
           onPageChange={setPage}
         />
-      </div>
+      </>
     );
   }
 
@@ -112,12 +107,11 @@ export function ProductListPage() {
         <ProductFilters
           search={filters.search}
           category={filters.category}
-          hasFilters={filters.hasFilters}
           onSearchChange={filters.setSearch}
           onCategoryChange={filters.setCategory}
           onClear={filters.clearFilters}
         />
-        {renderContent()}
+        <div aria-busy={isFetching}>{renderContent()}</div>
       </section>
 
       <DeleteProductDialog product={productToDelete} onClose={() => setProductToDelete(null)} />

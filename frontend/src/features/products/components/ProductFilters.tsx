@@ -1,11 +1,11 @@
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { useDebouncedInput } from '@/hooks/use-debounced-input';
 
 type ProductFiltersProps = {
   search: string;
   category: string;
-  hasFilters: boolean;
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onClear: () => void;
@@ -14,11 +14,23 @@ type ProductFiltersProps = {
 export function ProductFilters({
   search,
   category,
-  hasFilters,
   onSearchChange,
   onCategoryChange,
   onClear,
 }: ProductFiltersProps) {
+  const [searchInput, setSearchInput, resetSearch] = useDebouncedInput(search, onSearchChange);
+  const [categoryInput, setCategoryInput, resetCategory] = useDebouncedInput(
+    category,
+    onCategoryChange,
+  );
+  const hasFilters = Boolean(searchInput || categoryInput);
+
+  function handleClear() {
+    resetSearch();
+    resetCategory();
+    onClear();
+  }
+
   return (
     <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row sm:items-center">
       <div className="flex-1">
@@ -29,8 +41,8 @@ export function ProductFilters({
           id="product-search"
           type="search"
           placeholder="Buscar por nome"
-          value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
+          value={searchInput}
+          onChange={(event) => setSearchInput(event.target.value)}
           icon={<Search size={16} />}
         />
       </div>
@@ -41,12 +53,12 @@ export function ProductFilters({
         <Input
           id="product-category"
           placeholder="Categoria"
-          value={category}
-          onChange={(event) => onCategoryChange(event.target.value)}
+          value={categoryInput}
+          onChange={(event) => setCategoryInput(event.target.value)}
         />
       </div>
       {hasFilters && (
-        <Button variant="ghost" onClick={onClear}>
+        <Button variant="ghost" onClick={handleClear}>
           Limpar filtros
         </Button>
       )}

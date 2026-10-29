@@ -1,12 +1,19 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api/products.api';
-import type { ProductInput, ProductListParams } from '../types/product';
+import type { PaginatedProducts, ProductInput, ProductListParams } from '../types/product';
 import { productKeys } from './product-query-keys';
+
+export type ProductListResult = PaginatedProducts & {
+  params: ProductListParams;
+};
 
 export function useProducts(params: ProductListParams) {
   return useQuery({
     queryKey: productKeys.list(params),
-    queryFn: ({ signal }) => productsApi.list(params, signal),
+    queryFn: async ({ signal }): Promise<ProductListResult> => ({
+      ...(await productsApi.list(params, signal)),
+      params,
+    }),
     placeholderData: keepPreviousData,
   });
 }

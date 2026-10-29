@@ -17,6 +17,10 @@ export function useProductFilters() {
   function setFilter(key: FilterKey, value: string) {
     setSearchParams(
       (current) => {
+        if ((current.get(key) ?? '') === value) {
+          return current;
+        }
+
         const next = new URLSearchParams(current);
         if (value) {
           next.set(key, value);
@@ -50,7 +54,6 @@ export function useProductFilters() {
     page,
     search,
     category,
-    hasFilters: Boolean(search || category),
     setSearch: (value: string) => setFilter('search', value),
     setCategory: (value: string) => setFilter('category', value),
     setPage,
