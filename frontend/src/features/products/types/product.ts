@@ -24,7 +24,7 @@ export type ProductListParams = {
   category?: string;
 };
 
-export type PaginationMeta = {
+type PaginationMeta = {
   page: number;
   limit: number;
   total: number;

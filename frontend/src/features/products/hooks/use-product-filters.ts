@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
 type FilterKey = 'search' | 'category';
@@ -14,49 +15,51 @@ export function useProductFilters() {
   const search = searchParams.get('search') ?? '';
   const category = searchParams.get('category') ?? '';
 
-  function setFilter(key: FilterKey, value: string) {
-    setSearchParams(
-      (current) => {
-        if ((current.get(key) ?? '') === value) {
-          return current;
-        }
+  const setFilter = useCallback(
+    (key: FilterKey, value: string) => {
+      setSearchParams(
+        (current) => {
+          if ((current.get(key) ?? '') === value) {
+            return current;
+          }
 
+          const next = new URLSearchParams(current);
+          if (value) {
+            next.set(key, value);
+          } else {
+            next.delete(key);
+          }
+          next.delete('page');
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const setSearch = useCallback((value: string) => setFilter('search', value), [setFilter]);
+
+  const setCategory = useCallback((value: string) => setFilter('category', value), [setFilter]);
+
+  const setPage = useCallback(
+    (nextPage: number) => {
+      setSearchParams((current) => {
         const next = new URLSearchParams(current);
-        if (value) {
-          next.set(key, value);
+        if (nextPage > 1) {
+          next.set('page', String(nextPage));
         } else {
-          next.delete(key);
+          next.delete('page');
         }
-        next.delete('page');
         return next;
-      },
-      { replace: true },
-    );
-  }
+      });
+    },
+    [setSearchParams],
+  );
 
-  function setPage(nextPage: number) {
-    setSearchParams((current) => {
-      const next = new URLSearchParams(current);
-      if (nextPage > 1) {
-        next.set('page', String(nextPage));
-      } else {
-        next.delete('page');
-      }
-      return next;
-    });
-  }
-
-  function clearFilters() {
+  const clearFilters = useCallback(() => {
     setSearchParams({}, { replace: true });
-  }
+  }, [setSearchParams]);
 
-  return {
-    page,
-    search,
-    category,
-    setSearch: (value: string) => setFilter('search', value),
-    setCategory: (value: string) => setFilter('category', value),
-    setPage,
-    clearFilters,
-  };
+  return { page, search, category, setSearch, setCategory, setPage, clearFilters };
 }

@@ -9,7 +9,7 @@ import { healthRoutes } from './routes/health.routes.js';
 import { productRoutes } from './routes/product.routes.js';
 import { ProductService } from './services/product.service.js';
 
-export type BuildAppOptions = {
+type BuildAppOptions = {
   prisma: PrismaClient;
   corsOrigin: string[];
   logger?: boolean;

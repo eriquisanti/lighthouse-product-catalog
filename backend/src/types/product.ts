@@ -9,7 +9,7 @@ export type Product = {
   updatedAt: Date;
 };
 
-export type PaginationMeta = {
+type PaginationMeta = {
   page: number;
   limit: number;
   total: number;

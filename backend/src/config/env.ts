@@ -13,7 +13,7 @@ const envSchema = z.object({
   DATABASE_POOL_MAX: z.coerce.number().int().min(1).default(10),
 });
 
-export type Env = z.infer<typeof envSchema>;
+type Env = z.infer<typeof envSchema>;
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   const result = envSchema.safeParse(source);

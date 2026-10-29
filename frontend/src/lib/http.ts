@@ -1,6 +1,6 @@
 import { env } from '@/config/env';
 
-export type FieldError = {
+type FieldError = {
   field: string;
   message: string;
 };
@@ -32,10 +32,6 @@ export class ApiError extends Error {
     this.name = 'ApiError';
     this.status = status;
     this.fieldErrors = fieldErrors;
-  }
-
-  get isNetworkError(): boolean {
-    return this.status === 0;
   }
 
   get isClientError(): boolean {
