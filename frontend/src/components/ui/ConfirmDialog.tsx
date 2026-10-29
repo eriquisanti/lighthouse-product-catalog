@@ -77,7 +77,7 @@ export function ConfirmDialog({
         <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-strong">
           <TriangleAlert size={18} />
         </div>
-        <div>
+        <div className="min-w-0">
           <h2 id={titleId} className="font-display text-lg font-semibold">
             {title}
           </h2>

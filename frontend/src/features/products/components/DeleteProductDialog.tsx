@@ -35,9 +35,11 @@ export function DeleteProductDialog({ product, onClose }: DeleteProductDialogPro
       title="Excluir produto"
       description={
         <>
-          Tem certeza de que deseja excluir{' '}
-          <strong className="font-medium text-ink">{product?.name}</strong>? Esta ação não pode ser
-          desfeita.
+          <p>Tem certeza de que deseja excluir este produto?</p>
+          <p className="mt-2 truncate font-medium text-ink w-11/12" title={product?.name}>
+            {product?.name}
+          </p>
+          <p className='mt-4'>Esta ação não pode ser desfeita.</p>
         </>
       }
       confirmLabel="Excluir produto"
