@@ -16,8 +16,15 @@ const columnHeaderClass = 'px-4 py-3 text-xs font-medium tracking-wider text-mut
 
 export function ProductTableLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[720px] text-left">
+    <div className="relative overflow-x-auto">
+      <table className="w-full min-w-[860px] table-fixed text-left">
+        <colgroup>
+          <col />
+          <col className="w-44" />
+          <col className="w-32" />
+          <col className="w-28" />
+          <col className="w-52" />
+        </colgroup>
         <thead className="border-b border-line">
           <tr>
             <th scope="col" className={columnHeaderClass}>
@@ -48,25 +55,32 @@ export function ProductTable({ products, onDelete }: ProductTableProps) {
     <ProductTableLayout>
       {products.map((product) => (
         <tr key={product.id} className="transition-colors hover:bg-canvas/60">
-          <td className="max-w-xs px-4 py-3">
-            <p className="truncate text-sm font-medium">{product.name}</p>
+          <td className="px-4 py-3">
+            <p className="truncate text-sm font-medium" title={product.name}>
+              {product.name}
+            </p>
             {product.description && (
-              <p className="mt-0.5 truncate text-xs text-muted">{product.description}</p>
+              <p className="mt-0.5 truncate text-xs text-muted" title={product.description}>
+                {product.description}
+              </p>
             )}
           </td>
           <td className="px-4 py-3">
-            <span className="inline-flex rounded-full border border-line px-2.5 py-0.5 text-xs text-muted">
+            <span
+              className="inline-block max-w-full truncate rounded-full border border-line px-2.5 py-0.5 align-middle text-xs text-muted"
+              title={product.category}
+            >
               {product.category}
             </span>
           </td>
-          <td className="px-4 py-3 text-right font-mono text-sm">
+          <td className="px-4 py-3 text-right font-mono text-sm whitespace-nowrap">
             {formatCurrency(product.price)}
           </td>
-          <td className="px-4 py-3 text-right">
+          <td className="px-4 py-3 text-right whitespace-nowrap">
             <StockBadge stock={product.stock} />
           </td>
           <td className="px-4 py-3">
-            <div className="flex justify-end gap-1">
+            <div className="flex justify-end gap-1 whitespace-nowrap">
               <Link
                 to={`/products/${product.id}/edit`}
                 className={buttonVariants({ variant: 'ghost', size: 'sm' })}

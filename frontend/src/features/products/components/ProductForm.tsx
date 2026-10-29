@@ -44,6 +44,7 @@ export function ProductForm({ defaultValues, submitLabel, onSubmit }: ProductFor
     register,
     handleSubmit,
     setError,
+    setFocus,
     clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormValues, unknown, ProductInput>({
@@ -64,7 +65,14 @@ export function ProductForm({ defaultValues, submitLabel, onSubmit }: ProductFor
     }
 
     for (const { field, message } of fieldErrors) {
-      setError(field as ProductField, { type: 'server', message }, { shouldFocus: true });
+      setError(field as ProductField, { type: 'server', message });
+    }
+
+    const firstInvalidField = PRODUCT_FIELDS.find((field) =>
+      fieldErrors.some((fieldError) => fieldError.field === field),
+    );
+    if (firstInvalidField) {
+      setFocus(firstInvalidField);
     }
   }
 

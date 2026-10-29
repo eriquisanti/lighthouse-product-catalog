@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router';
+import { Outlet, ScrollRestoration } from 'react-router';
 import { Sidebar } from './Sidebar';
 
 export function AppLayout() {
@@ -10,6 +10,7 @@ export function AppLayout() {
           <Outlet />
         </div>
       </main>
+      <ScrollRestoration />
     </div>
   );
 }

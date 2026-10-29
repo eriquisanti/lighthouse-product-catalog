@@ -22,6 +22,7 @@ type RequestOptions = {
 const NETWORK_ERROR_MESSAGE =
   'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
 const UNEXPECTED_ERROR_MESSAGE = 'Ocorreu um erro inesperado. Tente novamente.';
+const SERVER_ERROR_MESSAGE = 'Não foi possível concluir a operação. Tente novamente mais tarde.';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -81,6 +82,10 @@ async function request<T>(
       throw error;
     }
     throw new ApiError(NETWORK_ERROR_MESSAGE, 0);
+  }
+
+  if (response.status >= 500) {
+    throw new ApiError(SERVER_ERROR_MESSAGE, response.status);
   }
 
   if (!response.ok) {

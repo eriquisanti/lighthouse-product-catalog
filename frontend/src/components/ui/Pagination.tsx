@@ -28,7 +28,7 @@ export function Pagination({
       className="flex flex-col items-center justify-between gap-3 border-t border-line px-4 py-3 sm:flex-row"
     >
       <p className="text-sm text-muted">
-        Mostrando <span className="font-mono text-ink">{formatInteger(firstItem)}</span>–
+        Mostrando <span className="font-mono text-ink">{formatInteger(firstItem)}</span> a{' '}
         <span className="font-mono text-ink">{formatInteger(lastItem)}</span> de{' '}
         <span className="font-mono text-ink">{formatInteger(total)}</span>
       </p>

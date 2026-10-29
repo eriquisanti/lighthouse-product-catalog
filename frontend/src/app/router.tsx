@@ -8,6 +8,7 @@ export const router = createBrowserRouter([
   {
     element: <AppLayout />,
     errorElement: <RouteErrorPage />,
+    hydrateFallbackElement: <div className="min-h-dvh bg-canvas" />,
     children: [
       { index: true, element: <Navigate to="/products" replace /> },
       { path: 'products', element: <ProductListPage /> },

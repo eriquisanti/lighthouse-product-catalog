@@ -31,7 +31,7 @@ export function ProductListPage() {
   const filters = useProductFilters();
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
-  const { data, isPending, isError, error, isFetching, isPlaceholderData, refetch } = useProducts({
+  const { data, isPending, error, isFetching, isPlaceholderData, refetch } = useProducts({
     page: filters.page,
     limit: PAGE_SIZE,
     search: filters.search.trim() || undefined,
@@ -52,7 +52,7 @@ export function ProductListPage() {
       return <ProductTableSkeleton />;
     }
 
-    if (isError) {
+    if (!data) {
       return <ErrorState message={getErrorMessage(error)} onRetry={() => refetch()} />;
     }
 

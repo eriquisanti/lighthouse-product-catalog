@@ -35,7 +35,7 @@ export function DeleteProductDialog({ product, onClose }: DeleteProductDialogPro
       title="Excluir produto"
       description={
         <>
-          Tem certeza que deseja excluir{' '}
+          Tem certeza de que deseja excluir{' '}
           <strong className="font-medium text-ink">{product?.name}</strong>? Esta ação não pode ser
           desfeita.
         </>

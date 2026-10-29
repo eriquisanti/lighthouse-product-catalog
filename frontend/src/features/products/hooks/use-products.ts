@@ -6,6 +6,7 @@ import {
   type QueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
+import { ApiError } from '@/lib/http';
 import { productsApi } from '../api/products.api';
 import type { Product, ProductInput, ProductListParams, ProductListResult } from '../types/product';
 import {
@@ -46,6 +47,19 @@ function markListsAsStale(
 
 function cacheSavedProduct(queryClient: QueryClient, product: Product) {
   queryClient.setQueryData(productKeys.detail(product.id), product);
+}
+
+function forgetProduct(queryClient: QueryClient, id: string) {
+  queryClient.removeQueries({ queryKey: productKeys.detail(id) });
+  updateCachedLists(queryClient, (list) => removeProductFromList(list, id));
+}
+
+function refetchVisibleLists(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: 'active' });
+}
+
+function isNotFoundError(error: Error): boolean {
+  return error instanceof ApiError && error.status === 404;
 }
 
 export function useProducts(params: ProductListParams) {
@@ -94,6 +108,12 @@ export function useUpdateProduct(id: string) {
       updateCachedLists(queryClient, (list) => replaceProductInList(list, product));
       return markListsAsStale(queryClient, isFilteredList);
     },
+    onError: (error) => {
+      if (isNotFoundError(error)) {
+        forgetProduct(queryClient, id);
+        return markListsAsStale(queryClient, () => true);
+      }
+    },
   });
 }
 
@@ -110,15 +130,20 @@ export function useDeleteProduct() {
       updateCachedLists(queryClient, (list) => removeProductFromList(list, id));
       return { previousLists };
     },
-    onError: (_error, _id, context) => {
+    onError: (error, id, context) => {
+      if (isNotFoundError(error)) {
+        forgetProduct(queryClient, id);
+        refetchVisibleLists(queryClient);
+        return;
+      }
+
       for (const [queryKey, list] of context?.previousLists ?? []) {
         queryClient.setQueryData(queryKey, list);
       }
     },
     onSuccess: (_result, id) => {
-      queryClient.removeQueries({ queryKey: productKeys.detail(id) });
+      forgetProduct(queryClient, id);
+      refetchVisibleLists(queryClient);
     },
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: productKeys.lists(), refetchType: 'active' }),
   });
 }
