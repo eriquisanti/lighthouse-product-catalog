@@ -21,6 +21,27 @@ function escapeLikePattern(value: string): string {
   return value.replace(/[\\%_]/g, '\\$&');
 }
 
+function containsIgnoringAccents(column: Prisma.Sql, term: string): Prisma.Sql {
+  const pattern = `%${escapeLikePattern(term)}%`;
+  return Prisma.sql`immutable_unaccent(${column}) ILIKE immutable_unaccent(${pattern})`;
+}
+
+function buildWhereClause({ search, category }: FindManyProductsParams): Prisma.Sql {
+  const conditions: Prisma.Sql[] = [];
+
+  if (search) {
+    conditions.push(containsIgnoringAccents(Prisma.raw('"name"'), search));
+  }
+
+  if (category) {
+    conditions.push(containsIgnoringAccents(Prisma.raw('"category"'), category));
+  }
+
+  return conditions.length > 0
+    ? Prisma.sql`WHERE ${Prisma.join(conditions, ' AND ')}`
+    : Prisma.empty;
+}
+
 function isRecordNotFound(error: unknown): boolean {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError && error.code === RECORD_NOT_FOUND_CODE
@@ -30,28 +51,25 @@ function isRecordNotFound(error: unknown): boolean {
 export class PrismaProductRepository implements ProductRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findMany({
-    page,
-    limit,
-    search,
-    category,
-  }: FindManyProductsParams): Promise<FindManyProductsResult> {
-    const where: Prisma.ProductWhereInput = {
-      ...(search && { name: { contains: escapeLikePattern(search), mode: 'insensitive' } }),
-      ...(category && { category }),
-    };
+  async findMany(params: FindManyProductsParams): Promise<FindManyProductsResult> {
+    const where = buildWhereClause(params);
+    const offset = (params.page - 1) * params.limit;
 
-    const [records, total] = await this.prisma.$transaction([
-      this.prisma.product.findMany({
-        where,
-        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.product.count({ where }),
+    const [records, countRows] = await this.prisma.$transaction([
+      this.prisma.$queryRaw<ProductRecord[]>`
+        SELECT id, name, description, price, stock, category,
+               created_at AS "createdAt", updated_at AS "updatedAt"
+        FROM products
+        ${where}
+        ORDER BY created_at DESC, id DESC
+        LIMIT ${params.limit} OFFSET ${offset}
+      `,
+      this.prisma.$queryRaw<{ total: number }[]>`
+        SELECT COUNT(*)::int AS total FROM products ${where}
+      `,
     ]);
 
-    return { items: records.map(toProduct), total };
+    return { items: records.map(toProduct), total: countRows[0]?.total ?? 0 };
   }
 
   async findById(id: string): Promise<Product | null> {

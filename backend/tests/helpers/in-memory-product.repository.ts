@@ -7,6 +7,17 @@ import type {
 import type { ProductInput } from '../../src/schemas/product.schema.js';
 import type { Product } from '../../src/types/product.js';
 
+function normalize(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+}
+
+function containsIgnoringAccents(value: string, term: string): boolean {
+  return normalize(value).includes(normalize(term));
+}
+
 export class InMemoryProductRepository implements ProductRepository {
   products: Product[] = [];
 
@@ -18,8 +29,8 @@ export class InMemoryProductRepository implements ProductRepository {
   }: FindManyProductsParams): Promise<FindManyProductsResult> {
     const filtered = this.products.filter(
       (product) =>
-        (!search || product.name.toLowerCase().includes(search.toLowerCase())) &&
-        (!category || product.category === category),
+        (!search || containsIgnoringAccents(product.name, search)) &&
+        (!category || containsIgnoringAccents(product.category, category)),
     );
     const start = (page - 1) * limit;
 

@@ -90,18 +90,60 @@ describe('Products routes', () => {
       ]);
     });
 
-    it('filters by exact category', async () => {
-      await insertProduct({ name: 'Mouse', category: 'Informática' });
-      await insertProduct({ name: 'Cadeira', category: 'Móveis' });
+    it.each([
+      ['MECANICO', 'Teclado Mecânico'],
+      ['tênis', 'Tênis de Corrida'],
+      ['tenis', 'Tênis de Corrida'],
+    ])('searches by name ignoring accents and case: %s', async (search, expectedName) => {
+      await insertProduct({ name: 'Teclado Mecânico' });
+      await insertProduct({ name: 'Tênis de Corrida' });
 
       const response = await app.inject({
         method: 'GET',
-        url: `/products?category=${encodeURIComponent('Móveis')}`,
+        url: `/products?search=${encodeURIComponent(search)}`,
       });
 
       expect(response.json().data.map((product: { name: string }) => product.name)).toEqual([
-        'Cadeira',
+        expectedName,
       ]);
+    });
+
+    it.each([
+      ['Móveis', 'Cadeira'],
+      ['moveis', 'Cadeira'],
+      ['INFORM', 'Mouse'],
+      ['mática', 'Mouse'],
+    ])(
+      'filters by partial category ignoring accents and case: %s',
+      async (category, expectedName) => {
+        await insertProduct({ name: 'Mouse', category: 'Informática' });
+        await insertProduct({ name: 'Cadeira', category: 'Móveis' });
+
+        const response = await app.inject({
+          method: 'GET',
+          url: `/products?category=${encodeURIComponent(category)}`,
+        });
+
+        expect(response.json().data.map((product: { name: string }) => product.name)).toEqual([
+          expectedName,
+        ]);
+      },
+    );
+
+    it('combines search and category filters', async () => {
+      await insertProduct({ name: 'Mouse Gamer', category: 'Informática' });
+      await insertProduct({ name: 'Mouse Pad', category: 'Acessórios' });
+      await insertProduct({ name: 'Teclado', category: 'Informática' });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/products?search=mouse&category=informatica',
+      });
+
+      expect(response.json().data.map((product: { name: string }) => product.name)).toEqual([
+        'Mouse Gamer',
+      ]);
+      expect(response.json().meta.total).toBe(1);
     });
 
     it.each([
