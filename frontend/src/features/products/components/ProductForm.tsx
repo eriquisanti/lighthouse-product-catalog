@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleAlert, LoaderCircle } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormRegisterReturn } from 'react-hook-form';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { buttonVariants } from '@/components/ui/button-variants';
@@ -8,6 +8,7 @@ import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { ApiError, getErrorMessage } from '@/lib/http';
+import { maskCurrency, maskInteger } from '@/lib/input-masks';
 import { productFormSchema, type ProductFormValues } from '../schemas/product-form.schema';
 import type { ProductInput } from '../types/product';
 
@@ -17,6 +18,19 @@ type ProductField = (typeof PRODUCT_FIELDS)[number];
 
 function isProductField(field: string): field is ProductField {
   return (PRODUCT_FIELDS as readonly string[]).includes(field);
+}
+
+function withInputMask<T extends UseFormRegisterReturn>(
+  field: T,
+  mask: (value: string) => string,
+): T {
+  return {
+    ...field,
+    onChange: (event) => {
+      event.target.value = mask(event.target.value);
+      return field.onChange(event);
+    },
+  };
 }
 
 type ProductFormProps = {
@@ -119,35 +133,37 @@ export function ProductForm({ defaultValues, submitLabel, onSubmit }: ProductFor
         <FormField
           id="product-price"
           label="Preço"
-          hint="Use vírgula para os centavos, ex.: 1.299,90"
+          hint="Digite apenas números. Os centavos são preenchidos automaticamente."
           error={errors.price?.message}
         >
           <Input
             id="product-price"
-            inputMode="decimal"
+            inputMode="numeric"
             placeholder="0,00"
+            autoComplete="off"
             icon={<span className="text-sm">R$</span>}
             className="font-mono"
             invalid={Boolean(errors.price)}
             aria-describedby={describedBy('price')}
-            {...register('price')}
+            {...withInputMask(register('price'), maskCurrency)}
           />
         </FormField>
 
         <FormField
           id="product-stock"
           label="Estoque"
-          hint="Quantidade disponível, em unidades."
+          hint="Quantidade disponível, em unidades inteiras."
           error={errors.stock?.message}
         >
           <Input
             id="product-stock"
             inputMode="numeric"
             placeholder="0"
+            autoComplete="off"
             className="font-mono"
             invalid={Boolean(errors.stock)}
             aria-describedby={describedBy('stock')}
-            {...register('stock')}
+            {...withInputMask(register('stock'), maskInteger)}
           />
         </FormField>
 
